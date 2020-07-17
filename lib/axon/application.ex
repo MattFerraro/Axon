@@ -14,9 +14,10 @@ defmodule Axon.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Axon.PubSub},
       # Start the Endpoint (http/https)
-      AxonWeb.Endpoint
+      AxonWeb.Endpoint,
       # Start a worker by calling: Axon.Worker.start_link(arg)
       # {Axon.Worker, arg}
+      {Axon.GrblConnection, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

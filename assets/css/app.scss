@@ -89,3 +89,10 @@
 .alert:empty {
   display: none;
 }
+
+.fake-console {
+  background-color: black;
+  color: white;
+  overflow-y: scroll;
+  height: 300px;
+}

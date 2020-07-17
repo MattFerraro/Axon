@@ -17,7 +17,7 @@ defmodule AxonWeb.Router do
   scope "/", AxonWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live "/", AxonLive, :index
   end
 
   # Other scopes may use custom stacks.
