@@ -88,6 +88,25 @@ defmodule Axon.GrblConnection do
     {:reply, :ok, %{state | log: []}}
   end
 
+  def parse_dro(msg) do
+    positions = msg |>
+      String.split("|") |>
+      Enum.find(fn(x) -> String.starts_with?(x, "MPos") end) |>
+      String.replace("MPos:", "") |>
+      String.split(",") |>
+      Enum.map(&String.to_float/1)
+
+    Enum.zip([:x, :y, :z], positions) |> Enum.into(%{})
+  end
+
+  def notify_listeners(state, msg) do
+    live_listeners = Enum.filter(state.listeners, fn(x) -> Process.alive?(x) end)
+    for listener <- live_listeners do
+      send(listener, {:log_update, msg})
+    end
+    live_listeners
+  end
+
   def handle_info({:circuits_uart, _source, msg}, state) do
     # If the message starts with a "<" char, don't update the log or anything
     # if the message is just "ok" then skip it entirely
@@ -95,20 +114,18 @@ defmodule Axon.GrblConnection do
       String.starts_with?(msg, "ok") ->
         {:noreply, state}
       String.starts_with?(msg, "<") ->
-        IO.puts "DRO Status: " <> msg
-        {:noreply, state}
+        dro_state = parse_dro(msg)
+        live_listeners = notify_listeners(state, "dro")
+        {:noreply, Map.merge(%{state | listeners: live_listeners}, dro_state)}
       true ->
-        live_listeners = Enum.filter(state.listeners, fn(x) -> Process.alive?(x) end)
-        for listener <- live_listeners do
-          send(listener, {:log_update, msg})
-        end
+        live_listeners = notify_listeners(state, "log")
         {:noreply, %{state | listeners: live_listeners, log: [msg | state.log]}}
     end
   end
 
   def handle_info(:query_dro, state) do
     Circuits.UART.write(state.uart_pid, "?")
-    Process.send_after(self(), :query_dro, 1000)
+    Process.send_after(self(), :query_dro, 200)
     {:noreply, state}
   end
 end

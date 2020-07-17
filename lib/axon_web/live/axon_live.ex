@@ -14,6 +14,10 @@ defmodule AxonWeb.AxonLive do
     ~L"""
     <h1>Serial Ports</h1>
 
+    <%= @grbl_state.x %></br>
+    <%= @grbl_state.y %></br>
+    <%= @grbl_state.z %></br>
+
     <button phx-click="port-refresh">
     Refresh Ports
     </button></br>
