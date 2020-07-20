@@ -47,7 +47,8 @@ defmodule Axon.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:circuits_uart, "~> 1.3"}
+      {:circuits_uart, "~> 1.3"},
+      {:phoenix_live_view_dropzone, "~> 0.0.7"}
     ]
   end
 

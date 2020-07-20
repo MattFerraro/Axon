@@ -1,0 +1,115 @@
+
+<div id="header">
+  <nav>
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo">Axon</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="sass.html">Serial Connection</a></li>
+        <li><a href="badges.html">Macros</a></li>
+        <li><a href="collapsible.html">Home</a></li>
+      </ul>
+    </div>
+  </nav>
+</div>
+<div id="page">
+
+  <div id="left-column">
+    <h3 style="margin:0px;">Serial Ports</h3>
+    <%# <button phx-click="port-refresh">
+    Refresh Ports
+    </button></br> %>
+    <a phx-click="port-refresh" class="waves-effect waves-light btn">Refresh Ports</a>
+
+    <%= for {key, _} <- @grbl_state.ports do %>
+    </br>
+    <%= if @grbl_state.connected == key do %>
+    <button value="<%= key %>" phx-click="close">Close</button>
+    <% else %>
+        <%= if @grbl_state.connected == "" do %>
+        <button value="<%= key %>" phx-click="connect">Connect</button>
+        <% else %>
+        <button disabled value="<%= key %>" phx-click="connect">Connect</button>
+        <% end %>
+    <% end %>
+    <%= key %>
+    <% end %>
+
+    <div id="console-log" class="fake-console">
+      <%= for logline <- Enum.reverse(@grbl_state.log) do %>
+          <%= logline %> </br>
+      <% end %>
+    </div>
+
+    <form phx-submit="send">
+      <input id="console-input" type="text" name="q" value="<%= @cmd %>" placeholder="Grbl console" list="results" autocomplete="off"/>
+      <button class="waves-effect waves-light btn" type="submit" phx-disable-with="Sending...">Send</button>
+    </form>
+    <button class="waves-effect waves-light btn" phx-click="clear">Clear</button>
+  </div>
+  <div id="center-column">
+    <%= f = form_for :post, "/uploads", [id: "file-upload-form", multipart: true] %>
+      <div class="post-submit-container">
+        <%= submit "Post", class: "post-submit" %>
+        <label for="post_image" class="post-submit-image"></label>
+        <%= file_input f, :image %>
+      </div>
+    </form>
+
+    <%= @file_state.filename %>
+  </div>
+  <div id="right-column">
+    <div class="dro">
+      <div class="dro-element">
+          X: <%= @grbl_state.x %></br>
+      </div>
+      <div class="dro-element">
+          Y: <%= @grbl_state.y %></br>
+      </div>
+      <div class="dro-element">
+          Z: <%= @grbl_state.z %></br>
+      </div>
+    </div>
+
+    <div class="dro-controls">
+      <div class="row" style="margin:5px;">
+        <div phx-click="xy-slew" phx-value="225" class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(225deg);">arrow_forward</i></div>
+        <div phx-click="xy-slew" phx-value="270" class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(270deg);">arrow_forward</i></div>
+        <div phx-click="xy-slew" phx-value="315" class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(315deg);">arrow_forward</i></div>
+      </div>
+      <div class="row" style="margin:5px;">
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(180deg);">arrow_forward</i></div>
+        <div class="col s2 waves-effect waves-light btn ctrl"> </div>
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(0deg);">arrow_forward</i></div>
+      </div>
+      <div class="row" style="margin:5px;">
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(135deg);">arrow_forward</i></div>
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(90deg);">arrow_forward</i></div>
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(45deg);">arrow_forward</i></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="row" style="margin:5px;">
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(-90deg);">arrow_forward</i></div>
+      </div>
+      <div class="row" style="margin:5px;">
+        <div class="col s2 waves-effect waves-light btn ctrl"> <i class="material-icons" style="transform: rotate(90deg);">arrow_forward</i></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function handleFilePost(e) {
+  e.preventDefault();
+  let form = document.querySelector("#file-upload-form");
+  let formData = new FormData(form);
+  console.log("Form data! ", formData);
+  let request = new XMLHttpRequest();
+  request.open("POST", "/uploads");
+  request.send(formData);
+}
+console.log("assigning listener!");
+document.querySelector("#file-upload-form button.post-submit").onclick = handleFilePost;
+</script>

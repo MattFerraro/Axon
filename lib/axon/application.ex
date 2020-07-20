@@ -17,7 +17,8 @@ defmodule Axon.Application do
       AxonWeb.Endpoint,
       # Start a worker by calling: Axon.Worker.start_link(arg)
       # {Axon.Worker, arg}
-      {Axon.GrblConnection, []}
+      {Axon.GrblConnection, []},
+      Axon.FileHolder
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

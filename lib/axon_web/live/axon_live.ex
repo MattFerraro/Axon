@@ -6,57 +6,14 @@ defmodule AxonWeb.AxonLive do
     grbl_state = Axon.GrblConnection.view(:grbl)
     socket = assign(socket, :grbl_state, grbl_state)
     socket = assign(socket, :cmd, "$$")
+    socket = assign(socket, :file_data, %{})
+    socket = assign(socket, :token, Phoenix.Controller.get_csrf_token())
     Axon.GrblConnection.register(:grbl, self())
+
+    file_state = Axon.FileHolder.get_state(:file_holder)
+    socket = assign(socket, :file_state, file_state)
+    Axon.FileHolder.register(:file_holder, self())
     {:ok, socket}
-  end
-
-  def render(assigns) do
-    ~L"""
-    <h1>Serial Ports</h1>
-
-    <%= @grbl_state.x %></br>
-    <%= @grbl_state.y %></br>
-    <%= @grbl_state.z %></br>
-
-    <button phx-click="port-refresh">
-    Refresh Ports
-    </button></br>
-
-    <%= for {key, _} <- @grbl_state.ports do %>
-      </br>
-      <%= if @grbl_state.connected == key do %>
-      <button value="<%= key %>" phx-click="close">Close</button>
-      <% else %>
-        <%= if @grbl_state.connected == "" do %>
-          <button value="<%= key %>" phx-click="connect">Connect</button>
-        <% else %>
-          <button disabled value="<%= key %>" phx-click="connect">Connect</button>
-        <% end %>
-      <% end %>
-      <%= key %>
-    <% end %>
-
-    <div id="console-log" class="fake-console">
-      <%= for logline <- Enum.reverse(@grbl_state.log) do %>
-        <%= logline %> </br>
-      <% end %>
-    </div>
-
-    <form phx-submit="send">
-      <input type="text" name="q" value="<%= @cmd %>" placeholder="Grbl console" list="results" autocomplete="off"/>
-      <button type="submit" phx-disable-with="Sending...">Send</button>
-    </form>
-    <button phx-click="clear">Clear</button>
-
-    <script>
-    function doStuff() {
-      let grblConsole = document.getElementById("console-log");
-      grblConsole.scrollTop = grblConsole.scrollHeight;
-    }
-    document.addEventListener('phx:update', doStuff);
-    </script>
-
-    """
   end
 
   def handle_event("port-refresh", _, socket) do
@@ -86,7 +43,41 @@ defmodule AxonWeb.AxonLive do
     {:noreply, socket |> assign(:grbl_state, Axon.GrblConnection.view(:grbl))}
   end
 
+  def handle_event("xy-slew", source, socket) do
+    IO.inspect source
+    {:noreply, socket}
+  end
+
+  # def handle_event("phx-dropzone", ["generate-url", payload], socket) do
+  #   IO.puts "GOT A PHX-DROPZONE GENERATE URL EVENT"
+  #   IO.puts "payload:"
+  #   IO.inspect payload
+  #   retval = %{id: payload["id"], url: "/uploads/" <> payload["name"]}
+  #   IO.puts "Using retval:"
+  #   IO.inspect retval
+  #   socket = assign(socket, :file_data, retval)
+  #   {:noreply, socket}
+  # end
+
+  def handle_event("save", params, socket) do
+    IO.inspect params
+    path_upload = params["Elixir.AxonWeb.Endpoint"]["docfile"]
+    IO.inspect path_upload
+    File.cp(path_upload.path, Path.absname("uploads/#{path_upload.filename}"))
+    {:noreply, socket}
+  end
+
+  # def handle_event("phx-dropzone", ["file-status", payload], socket) do
+  #   IO.puts "Got a file status msg:"
+  #   IO.inspect payload
+  #   {:noreply, socket}
+  # end
+
   def handle_info({:log_update, _msg}, socket) do
     {:noreply, socket |> assign(:grbl_state, Axon.GrblConnection.view(:grbl))}
+  end
+
+  def handle_info({:file_update, _msg}, socket) do
+    {:noreply, socket |> assign(:grbl_state, Axon.FileHolder.get_state(:file_holder))}
   end
 end

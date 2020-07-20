@@ -16,13 +16,25 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import NProgress from "nprogress"
 import {LiveSocket} from "phoenix_live_view"
+import { PhoenixLiveViewDropzone } from "phoenix_live_view_drop_zone";
+
+let Hooks = {};
+Hooks.PhoenixLiveViewDropzone = new PhoenixLiveViewDropzone();
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 
 // Show progress bar on live navigation and form submits
 window.addEventListener("phx:page-loading-start", info => NProgress.start())
 window.addEventListener("phx:page-loading-stop", info => NProgress.done())
+
+
+function doStuff() {
+    let grblConsole = document.getElementById("console-log");
+    grblConsole.scrollTop = grblConsole.scrollHeight;
+}
+document.addEventListener('phx:update', doStuff);
+
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()
@@ -31,3 +43,5 @@ liveSocket.connect()
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket
+
+

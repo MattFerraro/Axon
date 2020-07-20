@@ -6,8 +6,12 @@ defmodule AxonWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, {AxonWeb.LayoutView, :root}
-    plug :protect_from_forgery
+    # plug :protect_from_forgery
     plug :put_secure_browser_headers
+  end
+
+  pipeline :csrf do
+    plug :protect_from_forgery # to here
   end
 
   pipeline :api do
@@ -15,9 +19,13 @@ defmodule AxonWeb.Router do
   end
 
   scope "/", AxonWeb do
-    pipe_through :browser
-
+    pipe_through [:browser, :csrf]
     live "/", AxonLive, :index
+  end
+
+  scope "/", AxonWeb do
+    pipe_through [:browser]
+    resources "/uploads", UploadController
   end
 
   # Other scopes may use custom stacks.
