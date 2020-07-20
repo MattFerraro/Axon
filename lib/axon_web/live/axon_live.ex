@@ -48,17 +48,6 @@ defmodule AxonWeb.AxonLive do
     {:noreply, socket}
   end
 
-  # def handle_event("phx-dropzone", ["generate-url", payload], socket) do
-  #   IO.puts "GOT A PHX-DROPZONE GENERATE URL EVENT"
-  #   IO.puts "payload:"
-  #   IO.inspect payload
-  #   retval = %{id: payload["id"], url: "/uploads/" <> payload["name"]}
-  #   IO.puts "Using retval:"
-  #   IO.inspect retval
-  #   socket = assign(socket, :file_data, retval)
-  #   {:noreply, socket}
-  # end
-
   def handle_event("save", params, socket) do
     IO.inspect params
     path_upload = params["Elixir.AxonWeb.Endpoint"]["docfile"]
@@ -67,17 +56,11 @@ defmodule AxonWeb.AxonLive do
     {:noreply, socket}
   end
 
-  # def handle_event("phx-dropzone", ["file-status", payload], socket) do
-  #   IO.puts "Got a file status msg:"
-  #   IO.inspect payload
-  #   {:noreply, socket}
-  # end
-
   def handle_info({:log_update, _msg}, socket) do
     {:noreply, socket |> assign(:grbl_state, Axon.GrblConnection.view(:grbl))}
   end
 
   def handle_info({:file_update, _msg}, socket) do
-    {:noreply, socket |> assign(:grbl_state, Axon.FileHolder.get_state(:file_holder))}
+    {:noreply, socket |> assign(:file_state, Axon.FileHolder.get_state(:file_holder))}
   end
 end

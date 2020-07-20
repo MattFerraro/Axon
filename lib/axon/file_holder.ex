@@ -5,6 +5,7 @@ defmodule Axon.FileHolder do
   def start_link(_) do
     init_state = %{
       filename: "no file!",
+      lines: [],
       listeners: []
     }
     GenServer.start_link(__MODULE__, init_state, name: :file_holder)
@@ -34,8 +35,14 @@ defmodule Axon.FileHolder do
   end
 
   def handle_call({:set_filename, filename}, _from, state) do
+    lines =
+      File.stream!("uploads/#{filename}")
+        |> Stream.map(&String.trim/1)
+        |> Stream.with_index
+        |> Enum.to_list
+
     live_listeners = notify_listeners(state, "file_state")
-    {:reply, :ok, %{state | filename: filename, listeners: live_listeners}}
+    {:reply, :ok, %{state | filename: filename, lines: lines, listeners: live_listeners}}
   end
 
   def handle_call({:register, listener_pid}, _from, state) do

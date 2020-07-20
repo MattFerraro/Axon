@@ -56,6 +56,18 @@
     </form>
 
     <%= @file_state.filename %>
+
+
+    <i class="material-icons push-control waves-effect waves-teal btn-flat">play_arrow</i>
+    <i class="material-icons push-control waves-effect waves-teal btn-flat">pause</i>
+    <i class="material-icons push-control waves-effect waves-teal btn-flat">stop</i>
+
+
+    <%= for {line, index} <- @file_state.lines do %>
+      </br>
+      <%= line %>
+    <% end %>
+
   </div>
   <div id="right-column">
     <div class="dro">
